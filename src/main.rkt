@@ -34,14 +34,13 @@
              #:goal goal
              #:graph graph)
   (cond
-    [(and (hash? graph)
-          (hash-has-key? graph start)
-          (hash-has-key? graph goal))
-     (let ([found_nodes    (make-hash)]
-           [visited_nodes (make-hash)])
-      (found_nodes))]
+    [(and (hash? graph) (hash-has-key? graph start) (hash-has-key? graph goal))
+     (let ([found_nodes   (make-list)]
+           [visited_nodes (make-list)])
+      (list-set found_nodes start (cons start 0))
+    )]
     [else (error "Invalid args")]))
 
-(bfs #:graph graph
-     #:start 's
-     #:goal 'g)
+;(bfs #:graph graph
+;     #:start 's
+;     #:goal 'g)
