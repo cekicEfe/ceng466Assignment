@@ -26,14 +26,17 @@ def trace_back(node_set,start,goal):
   weight = 0;
   route = [current]
   while current is not start:
-    adjacent,edge_weigth = node_set[current]
+   #node ,edge_weight , cum_weight(used in ucs and a*)
+    adjacent,edge_weigth,_ = node_set[current]
     weight += edge_weigth
     current = adjacent
     route.append(current)
   route.reverse()
   return (route,weight)
   
-
+# this is just layer by layer search
+# it does expand expanded nodes :(
+# and throws error if it cant find goal 
 def bfs(graph,start,goal):
   if start in graph and goal in graph:
     print("Starting from :",start,", Searching : " + goal)
@@ -163,6 +166,8 @@ def dfs_test():
 
 
 # my ucs imp is a hot mess
+# but I game my everything for this one !!!!
+# 
 # pushed nodes neads to be compared by their cumulative weight
 # so I had wrap them in a class which utilizes __lt__ field
 # so heap can actually sort them
@@ -170,7 +175,9 @@ def dfs_test():
 #
 # this one should be complete compared to bfs and dfs
 # (complate as in : it doesnt break when it cannot find the goal
-# or gets stuck on graph loops or expands them for no reason)
+# or gets stuck on graph loops or expands them for no reason*)
+#
+# *: it will still expand some nodes if we find its shorter version to update the nodes in it
 import heapq
 
 class Node:
@@ -185,21 +192,108 @@ class Node:
 
 def ucs(graph,start,goal):
   if start in graph and goal in graph:
+    print("Starting from :",start,", Searching : " + goal)
     #current_node , came_from , edge_weight, cumul_weight
     found_nodes = [Node(start,start,0,0)]
     heapq.heapify(found_nodes)
-    path_set = dict()
+    path_set = dict() # node : (came_from,edge_weight,cumul_weight)
     visited_nodes = []
-    last_node = start
 
-    if found_nodes is not None:
-      if goal in path_set:
-        pass
-      else:
-        pass
+    #did we finish ?
+    while len(found_nodes) != 0: #nope
+
+      #look at the current shortest node
+      node = heapq.heappop(found_nodes)
+      visited_nodes.append(node.name)
+
+      #is it goal ?
+      if node.name is goal:
+
+        #did we find the goal before ?
+        if goal in path_set: #yep we found it
+
+          #is this node shorter than our previous vers. of goal ?
+          if node.cumulative_weigth < path_set[goal][2]:#yes
+
+            #update our goal
+            path_set[goal] = (node.came_from ,node.weigth ,node.cumulative_weigth)
+
+          else:
+            #do nothing
+            pass
+
+        # this is a new goal!
+        else:     
+          #set our goal
+          path_set[goal] = (node.came_from ,node.weigth ,node.cumulative_weigth)
+
+      #nope this not goal
+      else:        
+
+        #did we find goal before?
+        if goal in path_set:
+
+          # does this node can lead to a shorther path (this.cumulative < goal.cumulative)?
+          if node.cumulative_weigth < path_set[goal][2]:#yes!
+            #let this node go on
+            pass
+              
+          else: # no it cannot ! skip this node
+            continue
+          
+        else:#no we didnt find goal before...
+          pass
+
+        #did we visit this before ?
+        if node.name in path_set: #yes we visited this before!
+
+          #is this one shorter than the prev ?
+          if node.cumulative_weigth < path_set[node.name]: #yes this is shoreter
+
+            #update the node
+            path_set[node.name]= (node.came_from,
+                                  node.weigth,
+                                  node.cumulative_weigth)
+
+            #also start updating its children
+            for each_child in graph[node.name]:
+              heapq.heappush(found_nodes,Node(each_child[0],
+                             node.name,
+                             each_child[1],
+                             node.cumulative_weigth+each_child[1]))  
+
+          else: #no its not shorter
+            #screw that
+            pass
+
+        #no we havent visited this before
+        else:
+
+          #update the node
+          path_set[node.name]= (node.came_from,
+                                node.weigth,
+                                node.cumulative_weigth)
+                                   
+          #also start pushing its children to the heap
+          for each_child in graph[node.name]:
+            heapq.heappush(found_nodes,Node(each_child[0],
+                           node.name,
+                           each_child[1],
+                           node.cumulative_weigth+each_child[1]))
+
+    #
+    #print(path_set)
+  
+    (resulth,weight) = trace_back(path_set,start,goal)
+    print("THE PATH: ",end="");
+    print(resulth)
+    print("THE WEIGHT: ",end="")
+    print(weight)
+
+    return trace_back(path_set,start,goal)  
 
 def ucs_test():
-  print("DFS version")
+  print("UFS version")
   ucs(graph,"s","g")
   print(" ")
   ucs(graph,"b","g")
@@ -207,4 +301,6 @@ def ucs_test():
   ucs(graph,"g","g")
   print(" ")
   ucs(graph,"a","g")
+  
+def gbfs(graph,heuristic,start,goal):
   
