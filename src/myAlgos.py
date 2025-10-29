@@ -26,8 +26,12 @@ def trace_back(node_set,start,goal):
   weight = 0;
   route = [current]
   while current is not start:
-   #node ,edge_weight , cum_weight(used in ucs and a*)
-    adjacent,edge_weigth,_ = node_set[current]
+
+    #node ,edge_weight , cumul_weight(used in ucs and a*)
+    if len(node_set[current]) == 3: 
+      adjacent,edge_weigth,_ = node_set[current]
+    else:
+      adjacent,edge_weigth = node_set[current]
     weight += edge_weigth
     current = adjacent
     route.append(current)
@@ -76,7 +80,7 @@ def bfs(graph,start,goal):
     #for myset,came_from in path_set.items():
     #  print(myset,came_from)
   
-    print("THE VISITED NODES")
+    print("THE VISITED NODES : ",end="")
     print(visited_nodes)
 
     (resulth,weight) = trace_back(path_set,start,goal)
@@ -86,7 +90,7 @@ def bfs(graph,start,goal):
     print(weight)
 
 
-    return trace_back(path_set,start,goal)
+    return (resulth,weight)
   else:
     raise ValueError('Invalid args')
 
@@ -119,10 +123,11 @@ def dfs(graph,start,goal):
   if start in graph and goal in graph:
     print("Starting from :",start,", Searching : " + goal)
     path_set = dict()
-    visited_nodes = [start]
+    visited_nodes = []
 
     def delve_deeper(current_node,came_from,weight):
       path_set[current_node] = (came_from,weight)
+      visited_nodes.append(current_node)
       if current_node is goal:
         path_set[goal] = (came_from,weight)
         return True
@@ -138,7 +143,8 @@ def dfs(graph,start,goal):
 
     res = delve_deeper(start,start,0)
     if res is True:
-      print(path_set)
+      print("THE VISITED NODES : ",end="")
+      print(visited_nodes)
       
       (resulth,weight) = trace_back(path_set,start,goal)
       print("THE PATH: ",end="");
@@ -146,7 +152,7 @@ def dfs(graph,start,goal):
       print("THE WEIGHT: ",end="")
       print(weight)
 
-      return trace_back(path_set,start,goal)
+      return (resulth,weight)
     else:
       print("There is somehow no way from start to goal")
   else:
@@ -165,19 +171,16 @@ def dfs_test():
  #dfs(graph,"f","s")
 
 
-# my ucs imp is a hot mess
-# but I game my everything for this one !!!!
-# 
-# pushed nodes neads to be compared by their cumulative weight
-# so I had wrap them in a class which utilizes __lt__ field
-# so heap can actually sort them
-# it works at least
-#
-# this one should be complete compared to bfs and dfs
-# (complate as in : it doesnt break when it cannot find the goal
-# or gets stuck on graph loops or expands them for no reason*)
-#
-# *: it will still expand some nodes if we find its shorter version to update the nodes in it
+
+
+
+
+
+
+
+
+
+
 import heapq
 
 class Node:
@@ -190,6 +193,19 @@ class Node:
   def __lt__(self, other):
       return self.cumulative_weigth < other.cumulative_weigth
 
+# my ucs imp is a hot mess
+# but I gave my everything for this one!
+# 
+# pushed nodes neads to be compared by their cumulative weigth
+# so I had wrap them in a class which utilizes __lt__ field
+# so heap can actually sort them
+# it works at least
+#
+# this one should be complete compared to bfs and dfs
+# (complate as in : it doesnt break when it cannot find the goal
+# or gets stuck on graph loops or expands them for no reason*)
+#
+# *: it will still expand some nodes if we find its shorter version to update the nodes in it
 def ucs(graph,start,goal):
   if start in graph and goal in graph:
     print("Starting from :",start,", Searching : " + goal)
@@ -281,19 +297,19 @@ def ucs(graph,start,goal):
                            each_child[1],
                            node.cumulative_weigth+each_child[1]))
 
-    #
-    #print(path_set)
-  
+    
     (resulth,weight) = trace_back(path_set,start,goal)
     print("THE PATH: ",end="");
     print(resulth)
     print("THE WEIGHT: ",end="")
     print(weight)
 
-    return trace_back(path_set,start,goal)  
+    return (resulth,weight)
+  else:    
+    raise ValueError('Invalid args')
 
 def ucs_test():
-  print("UFS version")
+  print("UCS version")
   ucs(graph,"s","g")
   print(" ")
   ucs(graph,"b","g")
@@ -301,6 +317,186 @@ def ucs_test():
   ucs(graph,"g","g")
   print(" ")
   ucs(graph,"a","g")
-  
+
+#overkill as always
+class HeuristicNode():
+  def __init__(self, name ,came_from, weigth , heuristic):
+      self.name = name
+      self.came_from = came_from
+      self.weigth = weigth
+      self.heuristic = heuristic
+
+  def __lt__(self, other):
+      return self.heuristic < other.heuristic
+    
+#this is just dfs that prioritizes heuristic values (list version)
 def gbfs(graph,heuristic,start,goal):
-  
+  if (start in graph and goal in graph) and (start in heuristic and goal in heuristic):
+    print("Starting from :",start,", Searching : " + goal)
+
+    path_set = dict()
+    found_nodes = [HeuristicNode(start,start,0,heuristic[start])]
+    heapq.heapify(found_nodes)
+    visited_nodes = []
+
+    while len(found_nodes) != 0:
+      #look at the node
+      node = heapq.heappop(found_nodes)
+      visited_nodes.append(node.name)
+
+      #is current node goal ?
+      if node.name is goal : #Yes it is goal
+
+        #update path_set then getout
+        path_set[node.name] = (node.came_from,node.weigth)
+        break
+
+      #no it is not goal
+      else:
+        
+        #push nodes children to the list prioritizing its heuristic value
+        for each_child in graph[node.name]:
+          path_set[each_child[0]] = (node.name,each_child[1])
+          heapq.heappush(found_nodes,HeuristicNode(each_child[0],node.name,each_child[1],heuristic[each_child[0]]))
+
+    print(visited_nodes)     
+
+    (resulth,weight) = trace_back(path_set,start,goal)
+    print("THE PATH: ",end="");
+    print(resulth)
+    print("THE WEIGHT: ",end="")
+    print(weight)
+
+    return (resulth,weight)
+  else:
+    raise ValueError('Invalid args')
+
+
+def gbfs_test():
+  print("GBFS version")
+  gbfs(graph,heuristic,"s","g")
+  print(" ")
+  gbfs(graph,heuristic,"b","g")
+  print(" ")
+  gbfs(graph,heuristic,"g","g")
+  print(" ")
+  gbfs(graph,heuristic,"a","g")
+
+
+# and of course astar is ucs with h(n)=0
+# you got heuristic upgrade !
+def astar(graph,heuristic,start,goal):
+  if start in graph and goal in graph:
+    print("Starting from :",start,", Searching : " + goal)
+    #current_node , came_from , edge_weight, cumul_weight
+    found_nodes = [Node(start,start,0,0)]
+    heapq.heapify(found_nodes)
+    path_set = dict() # node : (came_from,edge_weight,cumul_weight)
+    visited_nodes = []
+
+    #did we finish ?
+    while len(found_nodes) != 0: #nope
+
+      #look at the current shortest node
+      node = heapq.heappop(found_nodes)
+      visited_nodes.append(node.name)
+
+      #is it goal ?
+      if node.name is goal:
+
+        #did we find the goal before ?
+        if goal in path_set: #yep we found it
+
+          #is this node shorter than our previous vers. of goal ?
+          if (node.cumulative_weigth + heuristic[node.name]) < path_set[goal][2]:#yes <-------- changed here
+
+            #update our goal
+            path_set[goal] = (node.came_from ,node.weigth ,(node.cumulative_weigth + heuristic[node.name]))# <----- changed here
+
+          else:
+            #do nothing
+            pass
+
+        # this is a new goal!
+        else:     
+          #set our goal
+          path_set[goal] = (node.came_from ,node.weigth ,(node.cumulative_weigth + heuristic[node.name])) #<-------- changed here
+
+
+      #nope this not goal
+      else:        
+
+        #did we find goal before?
+        if goal in path_set:
+
+          # does this node can lead to a shorther path (this.cumulative < goal.cumulative)?
+          if (node.cumulative_weigth + heuristic[node.name])< path_set[goal][2]:#yes! <-------- changed here
+            #let this node go on
+            pass
+              
+          else: # no it cannot ! skip this node
+            continue
+          
+        else:#no we didnt find goal before...
+          pass
+
+        #did we visit this before ?
+        if node.name in path_set: #yes we visited this before!
+
+          #is this one shorter than the prev ?
+          if (node.cumulative_weigth + heuristic[node.name])< path_set[node.name]: #yes this is shoreter <-------- changed here
+            #update the node
+            path_set[node.name]= (node.came_from,
+                                  node.weigth,
+                                  (node.cumulative_weigth + heuristic[node.name]))#<-------- changed here
+
+            #also start updating its children
+            for each_child in graph[node.name]:
+              heapq.heappush(found_nodes,Node(each_child[0],
+                             node.name,
+                             each_child[1],
+                             (node.cumulative_weigth + heuristic[node.name])+each_child[1])) #<-------- changed here
+
+
+          else: #no its not shorter
+            #screw that
+            pass
+
+        #no we havent visited this before
+        else:
+
+          #update the node
+          path_set[node.name]= (node.came_from,
+                                node.weigth,
+                                (node.cumulative_weigth + heuristic[node.name])) #<-------- changed here
+
+                                   
+          #also start pushing its children to the heap
+          for each_child in graph[node.name]:
+            heapq.heappush(found_nodes,Node(each_child[0],
+                           node.name,
+                           each_child[1],
+                           (node.cumulative_weigth + heuristic[node.name])+each_child[1])) #<-------- changed here
+
+
+    
+    (resulth,weight) = trace_back(path_set,start,goal)
+    print("THE PATH: ",end="");
+    print(resulth)
+    print("THE WEIGHT: ",end="")
+    print(weight)
+
+    return (resulth,weight)
+  else:    
+    raise ValueError('Invalid args')
+
+def astar_test():
+  print("GBFS version")
+  astar(graph,heuristic,"s","g")
+  print(" ")
+  astar(graph,heuristic,"b","g")
+  print(" ")
+  astar(graph,heuristic,"g","g")
+  print(" ")
+  astar(graph,heuristic,"a","g")
+
