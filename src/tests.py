@@ -76,8 +76,9 @@ zero_heuristic_test_2 = {
 }
 
 
-
-
+print("****************************************")
+print("*Please checkout the graphs at the file*")
+print("****************************************")
 
 if(len(sys.argv) == 1):
   print("Expected args are : bfs dfs ucs gbfs astar")
@@ -85,73 +86,64 @@ if(len(sys.argv) == 1):
 elif sys.argv[1] == "bfs":
 
   print("BFS version")
+  print("Graph 1 : ")
   bfs(graph_test_1,"s","g")
+
   print(" ")
-  bfs(graph_test_2,"e","g")
-  #bfs(graph_test_1,"b","g")
-  #print(" ")
-  #bfs(graph_test_1,"g","g")
-  #print(" ")
-  #bfs(graph_test_1,"a","g")
+  
+  print("Graph 2 : ")
+  bfs(graph_test_2,"s","g")
+  
 
 elif sys.argv[1] == "dfs":
 
   print("DFS version")
+  print("Graph 1 : ")
   dfs(graph_test_1,"s","g")
+
   print(" ")
+
+  print("Graph 2 : ")
   dfs(graph_test_2,"s","g")
-  #print(" ")
-  #dfs(graph_test_1,"g","g")
-  #print(" ")
-  #dfs(graph_test_1,"a","g")
+
   
 elif sys.argv[1] == "ucs":
 
   print("UCS version")
 
-  print("Graph:")
-  print("")
+  print("Graph 1 : ")
   ucs(graph_test_1,zero_heuristic_test_1,"s","g")
 
   print("")
   
-  print("Graph:")
-  print("")
+  print("Graph 2 : ")
   ucs(graph_test_2,zero_heuristic_test_2,"s","g")
-  print("")
-  ucs(graph_test_2,zero_heuristic_test_2,"e","g")
   
- #print(" ")
- #ucs(graph_test_1,zero_heuristic_test_1,"g","g")
- #print(" ")
- #ucs(graph_test_1,zero_heuristic_test_1,"a","g")  
 
 elif sys.argv[1] == "gbfs":
 
   print("GBFS version")
+  print("Graph 1 :")
   gbfs(graph_test_1,heuristic_test_1,"s","g")
+  
   print(" ")
-  gbfs(graph_test_2,heuristic_test_2,"b","g")
-
-  # these doesnt make much sense since heuristic
-  # function is determined from distance of s to g...
-  #print(" ")
-  #gbfs(graph_test_1,heuristic_test_1,"g","g")
-  #print(" ")
-  #gbfs(graph_test_1,heuristic_test_1,"a","g")
+  
+  print("Graph 2 :")
+  gbfs(graph_test_2,heuristic_test_2,"s","g")
 
 elif sys.argv[1] == "astar":
 
   # these doesnt make much sense since heuristic
   # function is determined from distance of s to g...
   print("A* version")
+  print("Graph 1 :")
   astar(graph_test_1,heuristic_test_1,"s","g")
+  
   print(" ")
+
+  print("Graph 2 :")
   astar(graph_test_2,heuristic_test_2,"s","g")
-  #print(" ")
-  #astar(graph_test_1,heuristic_test_1,"g","g")
-  #print(" ")
-  #astar(graph_test_1,heuristic_test_1,"a","g")
+
 
 else:
   print("Expected args are : bfs dfs ucs gbfs astar")

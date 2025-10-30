@@ -32,7 +32,6 @@ def bfs(graph,start,goal):
 
       node = found_nodes.pop(0)
       visited_nodes.append(node[0])
-      print(visited_nodes)
 
       #is this node goal ?
       if node[0] is goal: #yes its goal
@@ -92,28 +91,32 @@ def dfs(graph,start,goal):
     print("Starting from :",start,", Searching : " + goal)
     path_set = dict()
     visited_nodes = []
-
     
     def delve_deeper(current_node,came_from,weight):
 
       # did we find goal ?
       if current_node is goal: #yes we find the goal
-        path_set[goal] = (came_from,weight)
+        path_set[current_node] = (came_from,weight)
         return True
-      else: # we didnt find the goal
-        if current_node in path_set:
-          return False
-        result = False
+
+      else: #no we didnt
+        did_find_goal = False
         if graph[current_node] is not None:
-          for each_child in graph[current_node]:
-            path_set[each_child[0]]=(current_node,each_child[1])
-            result = result or delve_deeper(each_child[0],current_node,each_child[1])
-            if result:
-              return result
-          return result
-        else:
-          return False
+          for each_value in graph[current_node]:
+            if each_value[0] in path_set:
+              return False              
+            else:
+              path_set[each_value[0]] = (current_node,each_value[1])
+              did_child_find_goal = delve_deeper(each_value[0],current_node,each_value[1])
+              did_find_goal = did_find_goal or did_child_find_goal
+              if did_find_goal:
+                return True
+                break
+              
         
+        
+
+              
     found_goal = delve_deeper(start,start,0)
 
     if found_goal:
