@@ -7,10 +7,10 @@ def trace_back(node_set,start,goal):
 
     #node ,edge_weight , cumul_weight(used in ucs and a*)
     if len(node_set[current]) == 3: 
-      adjacent,edge_weigth,_ = node_set[current]
+      adjacent,edge_weight,_ = node_set[current]
     else:
-      adjacent,edge_weigth = node_set[current]
-    weight += edge_weigth
+      adjacent,edge_weight = node_set[current]
+    weight += edge_weight
     current = adjacent
     route.append(current)
   route.reverse()
@@ -24,7 +24,7 @@ def bfs(graph,start,goal):
 
     found_goal = False
     visited_nodes = []
-    #current_node , came_from , weigth
+    #current_node , came_from , weight
     found_nodes = [(start,start,0)] #start from the first node
     path_set = dict()
     
@@ -141,18 +141,18 @@ def dfs(graph,start,goal):
 import heapq
 
 class Node:
-  def __init__(self, name ,came_from, weigth , cumulative_weigth):
+  def __init__(self, name ,came_from, weight , cumulative_weight):
       self.name = name
       self.came_from = came_from
-      self.weigth = weigth
-      self.cumulative_weigth = cumulative_weigth
+      self.weight = weight
+      self.cumulative_weight = cumulative_weight
 
   def __lt__(self, other):
-      return self.cumulative_weigth < other.cumulative_weigth
+      return self.cumulative_weight < other.cumulative_weight
 
 # my ucs imp is a hot mess
 # 
-# pushed nodes neads to be compared by their cumulative weigth
+# pushed nodes neads to be compared by their cumulative weight
 # so I had wrap them in a class which utilizes __lt__ field
 # so heap can actually sort them
 # it works at least
@@ -188,10 +188,10 @@ def ucs(graph,heuristic,start,goal):
         if goal in path_set: #yep we found it
 
           #is this node shorter than our previous vers. of goal ?
-          if  (node.cumulative_weigth + heuristic[node.name]) < path_set[goal][2]:#yes
+          if  (node.cumulative_weight + heuristic[node.name]) < path_set[goal][2]:#yes
 
             #update our goal
-            path_set[goal] = (node.came_from ,node.weigth ,(node.cumulative_weigth + heuristic[node.name]))
+            path_set[goal] = (node.came_from ,node.weight ,(node.cumulative_weight + heuristic[node.name]))
 
           else:
             #do nothing
@@ -200,7 +200,7 @@ def ucs(graph,heuristic,start,goal):
         # this is a new goal!
         else:     
           #set our goal
-          path_set[goal] = (node.came_from ,node.weigth ,(node.cumulative_weigth + heuristic[node.name]))
+          path_set[goal] = (node.came_from ,node.weight ,(node.cumulative_weight + heuristic[node.name]))
 
 
       #nope this not goal
@@ -210,7 +210,7 @@ def ucs(graph,heuristic,start,goal):
         if goal in path_set:
 
           # does this node can lead to a shorther path (this.cumulative < goal.cumulative)?
-          if (node.cumulative_weigth + heuristic[node.name]) < path_set[goal][2]:#yes!
+          if (node.cumulative_weight + heuristic[node.name]) < path_set[goal][2]:#yes!
             #let this node go on
             pass
               
@@ -224,12 +224,12 @@ def ucs(graph,heuristic,start,goal):
         if node.name in path_set: #yes we visited this before!
 
           #is this one shorter than the prev ?
-          if  (node.cumulative_weigth + heuristic[node.name]) < path_set[node.name][2]: #yes this is shoreter
+          if  (node.cumulative_weight + heuristic[node.name]) < path_set[node.name][2]: #yes this is shoreter
 
             #update the node
             path_set[node.name]= (node.came_from,
-                                  node.weigth,
-                                  (node.cumulative_weigth + heuristic[node.name]))
+                                  node.weight,
+                                  (node.cumulative_weight + heuristic[node.name]))
 
             #also start updating its children
             # IF its not a deadend
@@ -238,7 +238,7 @@ def ucs(graph,heuristic,start,goal):
                 heapq.heappush(found_nodes,Node(each_child[0],
                                node.name,
                                each_child[1],
-                               (node.cumulative_weigth + heuristic[node.name])+each_child[1]))  
+                               (node.cumulative_weight + heuristic[node.name])+each_child[1]))  
 
           else: #no its not shorter
             #screw that
@@ -249,8 +249,8 @@ def ucs(graph,heuristic,start,goal):
 
           #update the node
           path_set[node.name]= (node.came_from,
-                                node.weigth,
-                                (node.cumulative_weigth + heuristic[node.name]))
+                                node.weight,
+                                (node.cumulative_weight + heuristic[node.name]))
                                    
           # also start pushing its children to the heap
           # IF its not a deadend
@@ -259,7 +259,7 @@ def ucs(graph,heuristic,start,goal):
               heapq.heappush(found_nodes,Node(each_child[0],
                              node.name,
                              each_child[1],
-                             (node.cumulative_weigth + heuristic[node.name])+each_child[1]))
+                             (node.cumulative_weight + heuristic[node.name])+each_child[1]))
 
     if found_goal:
       (resulth,weight) = trace_back(path_set,start,goal)
@@ -280,10 +280,10 @@ def ucs(graph,heuristic,start,goal):
 
 #overkill as always
 class HeuristicNode():
-  def __init__(self, name ,came_from, weigth , heuristic):
+  def __init__(self, name ,came_from, weight , heuristic):
       self.name = name
       self.came_from = came_from
-      self.weigth = weigth
+      self.weight = weight
       self.heuristic = heuristic
 
   def __lt__(self, other):
@@ -309,7 +309,7 @@ def gbfs(graph,heuristic,start,goal):
       if node.name is goal : #Yes it is goal
 
         #update path_set then getout
-        path_set[node.name] = (node.came_from,node.weigth)
+        path_set[node.name] = (node.came_from,node.weight)
         found_goal=True
         break
 
