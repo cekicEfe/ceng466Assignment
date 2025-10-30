@@ -23,7 +23,7 @@ def bfs(graph,start,goal):
     print("Starting from :",start,", Searching : " + goal)
 
     found_goal = False
-    visited_nodes = []
+    #visited_nodes = []
     #current_node , came_from , weight
     found_nodes = [(start,start,0)] #start from the first node
     path_set = dict()
@@ -31,7 +31,7 @@ def bfs(graph,start,goal):
     while len(found_nodes) != 0:
 
       node = found_nodes.pop(0)
-      visited_nodes.append(node[0])
+      #visited_nodes.append(node[0])
 
       #is this node goal ?
       if node[0] is goal: #yes its goal
@@ -61,8 +61,8 @@ def bfs(graph,start,goal):
       print(resulth)
       print("THE WEIGHT: ",end="")
       print(weight)
-      print("THE VISITED NODES : ",end="")
-      print(visited_nodes)
+      #print("THE VISITED NODES : ",end="")
+      #print(visited_nodes)
       return (resulth,weight)
     else:
       print("Couldnt find goal")
@@ -90,7 +90,7 @@ def dfs(graph,start,goal):
   if start in graph and goal in graph:
     print("Starting from :",start,", Searching : " + goal)
     path_set = dict()
-    visited_nodes = []
+    #visited_nodes = []
     
     def delve_deeper(current_node,came_from,weight):
 
@@ -125,8 +125,8 @@ def dfs(graph,start,goal):
       print(resulth)
       print("THE WEIGHT: ",end="")
       print(weight)
-      print("THE VISITED NODES : ",end="")
-      print(visited_nodes)
+      #print("THE VISITED NODES : ",end="")
+      #print(visited_nodes)
       return (resulth,weight)
     else:
       print("Couldnt find goal")
@@ -168,10 +168,10 @@ def ucs(graph,heuristic,start,goal):
   if (start in graph and goal in graph) and (start in heuristic and goal in heuristic):
     print("Starting from :",start,", Searching : " + goal)
     #current_node , came_from , edge_weight, cumul_weight
-    found_nodes = [Node(start,start,0,0)]
+    found_nodes = [Node(start,start,0,heuristic[start])]
     heapq.heapify(found_nodes)
     path_set = dict() # node : (came_from,edge_weight,cumul_weight)
-    visited_nodes = []
+    #visited_nodes = []
     found_goal = False
 
     #did we finish ?
@@ -179,7 +179,7 @@ def ucs(graph,heuristic,start,goal):
 
       #look at the current shortest node
       node = heapq.heappop(found_nodes)
-      visited_nodes.append(node.name)
+      #visited_nodes.append(node.name)
   
       #is it goal ?
       if node.name is goal:
@@ -267,8 +267,8 @@ def ucs(graph,heuristic,start,goal):
       print(resulth)
       print("THE WEIGHT: ",end="")
       print(weight)
-      print("VISITED NODES: ",end="")
-      print(visited_nodes)
+      #print("VISITED NODES: ",end="")
+      #print(visited_nodes)
 
       return (resulth,weight)
     else:
